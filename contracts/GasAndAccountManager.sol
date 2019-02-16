@@ -119,12 +119,12 @@ contract GasAndAccountManager is TidbitsHelpers {
 
     function registerRegisteredApplication(address registeredApplication) public returns (bool success) {
         require(signers[msg.sender] == true, "only the elect may add a registered application");
-        registeredRegisteredApplications[registeredApplication] = true;
+        registeredApplications[registeredApplication] = true;
         return true;
     }
 
     modifier onlyRegisteredApplication {
-        require (registeredRegisteredApplications[msg.sender] == true, "don't throw the count off buster");
+        require (registeredApplications[msg.sender] == true, "this interface is available to registered applications only");
         _;
     }
 

@@ -1,7 +1,6 @@
 pragma solidity ^0.5.0;
 
-import "openzeppelin-solidity/contracts/token/ERC721/ERC721Enumerable.sol";
-import "openzeppelin-solidity/contracts/token/ERC721/IERC721Receiver.sol";
+import "./nonspecERC721Metadata.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20burnable.sol";
 
 /**********************************
@@ -62,11 +61,18 @@ interface ERC998ERC721BottomUp {
 
 
 
-contract ComposableTopDown is ERC721Enumerable, ERC998ERC721TopDown, ERC998ERC721TopDownEnumerable,
-ERC998ERC20TopDown, ERC998ERC20TopDownEnumerable, ERC20Burnable, IERC721Receiver {
+contract ComposableTopDown is ERC998ERC721TopDown, ERC998ERC721TopDownEnumerable,
+ERC998ERC20TopDown, ERC998ERC20TopDownEnumerable, ERC20Burnable, IERC721Receiver, nonspecERC721Metadata {
     // return this.rootOwnerOf.selector ^ this.rootOwnerOfChild.selector ^
     //   this.tokenOwnerOf.selector ^ this.ownerOfChild.selector;
     bytes32 constant ERC998_MAGIC_VALUE = 0xcd740db5;
+
+    // following 5 lines not to be blamed on @mudgen
+    string public name = "Tidbit";
+    string public symbol = "TDBT";
+    // ZERO DECIMALS. Why does anyone want to deal with pennies? EV4R?!?!?!?!?! /rant
+    uint8 public decimals = 0;
+    uint public INITIAL_SUPPLY = 666666666;
 
     uint256 tokenCount = 0;
 
@@ -578,3 +584,4 @@ ERC998ERC20TopDown, ERC998ERC20TopDownEnumerable, ERC20Burnable, IERC721Receiver
     }
 
 }
+
