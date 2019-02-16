@@ -1,14 +1,17 @@
 <template>
   <CardBase>
-    <div class="header" slot="header">
+    <div v-if="state !== 3" class="header" slot="header">
       <div :class="['btn-add', {'open' : open}]" @click="btnClick"><img src="../assets/plus.svg" alt=""></div>
       <p>{{ headertxt }}</p>
+    </div>
+    <div v-else>
+
     </div>
     <div ref="collapseContent" class="words">
       <div v-if="state === 1" class="word-box">
         <Word v-for="word in words" :key="word" :word="word" @word-sel="wordSelected($event)"/>
       </div>
-      <DragnDrop ref="dragNDrop" v-if="state === 2"/>
+      <DragnDrop ref="dragNDrop" v-if="state === 2" @poem-finalized="poemFinalized($event)"/>
     </div>
   </CardBase>
 </template>
@@ -16,6 +19,7 @@
 import CardBase from './CardBase'
 import Word from './Word'
 import DragnDrop from './DragnDrop'
+import { genWords } from '../utils'
 
 export default {
   name: 'CardBtn',
@@ -37,6 +41,8 @@ export default {
           return 'Pick your seed...'
         case 2:
           return 'Build you poem...'
+        case 3:
+          return ''
       }
     }
   },
@@ -45,26 +51,25 @@ export default {
       if (this.state === 0) {
         this.open = true
         this.state = 1
+        this.words = genWords(5)
       } else {
         this.open = false
         this.state = 0
       }
       console.log(this.state)
     },
-    expandCard() {},
     collapse() {
       let el = this.$refs.collapseContent
       if (!this.open) {
         this.open = true
-
         let maxHeight = el.firstElementChild.scrollHeight
         el.setAttribute('style', `max-height: ${maxHeight}px`)
       } else {
         this.headerText = 'Make your mark!'
-
         el.removeAttribute('style')
       }
     },
+    poemFinalized()
     wordSelected(word) {
       this.state = 2
       console.log(word)
