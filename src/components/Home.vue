@@ -1,37 +1,17 @@
 <template>
   <div class="container">
-    <h2>ImageRegistry</h2>
-
-    <div class="box">
-      <h3>Add Asset</h3>
-      <div class="form">
-        <input type="text" name="ref" v-model="newRef" placeholder="Image Address">
-        <input type="text" name="id" v-model="newId" placeholder="Image ID">
-        <button class="btn" @click="addAssetItem">Submit</button>
-      </div>
-    </div>
-
-    <div class="list">
-      <div class="list-item" v-for="item in items">
-        <div class="asset">
-          <img :src="getImagePath(item)">
-        </div>
-        <div class="copy">
-          <h4>Ref: {{ item.ref }}</h4>
-          <p>ID: {{ item.id }}</p>
-        </div>
-        <button class="btn" @click="deleteAsset(item)">Delete</button>
-      </div>
-    </div>
+    <CardBtn header-text="Make your mark!" btn-text=""/>
   </div>
 </template>
-
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import CardBtn from './CardBtn'
 
 export default {
   name: 'Home',
-
+  components: {
+    CardBtn
+  },
   data() {
     return {
       newRef: '0x06012c8cf97bead5deae237070f9587f8e7a266d',
@@ -61,12 +41,10 @@ export default {
   }
 }
 </script>
-
 <style lang="scss" scoped>
 @import '../scss/variables.scss';
 
 .container {
-  margin: 20px auto;
 }
 
 h2 {
