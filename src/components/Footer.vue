@@ -19,8 +19,6 @@ footer {
   display: flex;
   padding: 20px 0;
   text-align: center;
-  position: absolute;
-  bottom: 0;
   span {
     margin: auto;
   }

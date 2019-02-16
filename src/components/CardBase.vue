@@ -32,6 +32,4 @@ export default {
         .card-cont
             p
                 text-align: center
-    .section
-      margin: 10px 0
 </style>

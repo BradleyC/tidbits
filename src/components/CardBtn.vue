@@ -1,48 +1,72 @@
 <template>
   <CardBase>
     <div class="header" slot="header">
-      <div :class="['btn-add', {'open' : open}]" @click="collapse"><img src="../assets/plus.svg" alt=""></div>
-      <p>{{ headerText }}</p>
+      <div :class="['btn-add', {'open' : open}]" @click="btnClick"><img src="../assets/plus.svg" alt=""></div>
+      <p>{{ headertxt }}</p>
     </div>
     <div ref="collapseContent" class="words">
-      <Word v-for="word in words" :key="word" :word="word" @word-sel="wordSelected($event)"/>
+      <div v-if="state === 1" class="word-box">
+        <Word v-for="word in words" :key="word" :word="word" @word-sel="wordSelected($event)"/>
+      </div>
+      <DragnDrop ref="dragNDrop" v-if="state === 2"/>
     </div>
   </CardBase>
 </template>
 <script>
 import CardBase from './CardBase'
 import Word from './Word'
+import DragnDrop from './DragnDrop'
 
 export default {
   name: 'CardBtn',
-  components: { Word, CardBase },
+  components: { Word, CardBase, DragnDrop },
   props: ['header-text', 'btn-text'],
   data() {
     return {
       words: ['zoo', 'time', 'acrobat', 'chance', 'tinker'],
-      open: false
+      open: false,
+      state: 0
     }
   },
-  // TODO: Create a state machine -- switch statemnt 0 - "make you.." 1 - "seed" 2 - "drag n drop"
+  computed: {
+    headertxt: function() {
+      switch (this.state) {
+        case 0:
+          return 'Make your mark!'
+        case 1:
+          return 'Pick your seed...'
+        case 2:
+          return 'Build you poem...'
+      }
+    }
+  },
   methods: {
     btnClick() {
-      this.open = !this.open
+      if (this.state === 0) {
+        this.open = true
+        this.state = 1
+      } else {
+        this.open = false
+        this.state = 0
+      }
+      console.log(this.state)
     },
     expandCard() {},
     collapse() {
       let el = this.$refs.collapseContent
       if (!this.open) {
         this.open = true
-        this.headerText = ' pick a seed word...'
+
         let maxHeight = el.firstElementChild.scrollHeight
-        el.setAttribute('style', `max-height: ${maxHeight + 5}px`)
+        el.setAttribute('style', `max-height: ${maxHeight}px`)
       } else {
         this.headerText = 'Make your mark!'
-        this.open = false
+
         el.removeAttribute('style')
       }
     },
     wordSelected(word) {
+      this.state = 2
       console.log(word)
     }
   }
@@ -54,19 +78,21 @@ export default {
     display: flex
     .btn-add
       img
+        display: grid
         width: 50px
       transition: all 320ms ease
+      display: grid
+      grid-template-columns: auto 1fr
+      align-items: center
+      cursor: pointer
 
     .open.btn-add
       transform: rotate(45deg)
     p
       margin-left: 15px
-
   .words
-    display: flex
-    justify-content: space-evenly
-    max-height: 0
-    overflow: hidden
-    transition: max-height 320ms ease
+    .word-box
+      display: flex
+      justify-content: space-evenly
 
 </style>
