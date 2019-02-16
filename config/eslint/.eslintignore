@@ -1,0 +1,9 @@
+../build/*.js
+./*.js
+.gitignore
+/config
+/scripts
+/migrations
+/build
+.git
+/test

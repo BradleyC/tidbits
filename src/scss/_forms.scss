@@ -1,0 +1,19 @@
+@import 'variables';
+
+input {
+  border: 1px solid $lightgrey;
+  border-radius: $border-radius;
+  color: $darkgrey;
+  display: inline-block;
+  font-size: 12pt;
+  margin: 0;
+  padding: 7px 10px;
+  outline: none;
+}
+
+label {
+  font-weight: 500;
+  position: absolute;
+  padding: 12px;
+  text-align: left;
+}

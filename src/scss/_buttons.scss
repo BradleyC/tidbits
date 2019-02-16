@@ -1,0 +1,21 @@
+.btn {
+  background: transparent;
+  border: 2px solid transparent;
+  color: $primary;
+  cursor: pointer;
+  font-size: 12pt;
+  font-weight: 500;
+  padding: 7px 12px;
+
+  &.btn-primary {
+    background: $primary;
+    color: $white;
+    transition: all 220ms ease;
+  }
+
+  &.btn-error {
+    background: $error;
+    color: $white;
+    transition: all 220ms ease;
+  }
+}
