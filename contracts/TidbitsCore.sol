@@ -7,10 +7,11 @@ contract TidbitsCore is Composable, Accounts {
         This contract interacts heavily with an external gas and account manager contract.
         
      */
-
     
+    // wrapper for state changing functions - call them and then register with GasMan
+    // create token
+    // append to parent
 
-    constructor () public {
-        // this constructor is still under construction
+    constructor (address gam) public {
     }
 }

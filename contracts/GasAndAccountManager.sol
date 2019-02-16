@@ -117,7 +117,7 @@ contract GasAndAccountManager is TidbitsHelpers {
 
     event batchClosed(uint256 totalActions, uint256 totalGas);
 
-    function registerRegisteredApplication(address registeredApplication) public returns (bool success) {
+    function registerApplication(address registeredApplication) public returns (bool success) {
         require(signers[msg.sender] == true, "only the elect may add a registered application");
         registeredApplications[registeredApplication] = true;
         return true;
