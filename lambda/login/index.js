@@ -1,4 +1,5 @@
 var AWS = require('aws-sdk');
+var keythereum = require("keythereum");
 
 const TABLE = process.env.TABLE;
 var DB = new AWS.DynamoDB();
@@ -49,11 +50,19 @@ function genResponse(statusCode, body) {
 function createNewAccount(email) {
   return new Promise(async (resolve, reject) => {
     var createAcctErr;
-    // TODO Call keythereum createkey method
-    var newAddress = 'helloworld';
-
-    // Generate a data key in KMS:
-    var encryptedObj = await encryptKey(newAddress).catch(error => {
+    // Call keythereum createkey method
+    var dk = await createPrivateKey();
+    
+    // hash the secret key in KMS:
+    var encryptedObj = await encryptKey(dk.privateKey).catch(error => {
+      console.log(error);
+      createAcctErr = true;
+      reject(error);
+    });
+    if (createAcctErr) return;
+    
+    // Generate public address
+    var newAddress = await createAddress(dk).catch(error => {
       console.log(error);
       createAcctErr = true;
       reject(error);
@@ -101,10 +110,45 @@ function createLookupEntry(email, address, ciphertextBlob) {
 }
 
 /* KMS METHODS */
-function encryptKey(key) {
+function encryptKey(privateKey) {
   var params = {
     KeyId: process.env.KEY_ID,
-    Plaintext: Buffer.from(key)
+    Plaintext: privateKey
   };
   return KMS.encrypt(params).promise();
+}
+
+function generateDataKey() {
+  var params = {
+    KeyId: process.env.KEY_ID,
+    KeySpec: 'AES_256'
+  };
+  return KMS.generateDataKey(params).promise();
+}
+
+/* KEYTHEREUM METHODS */
+function createPrivateKey() {
+  return new Promise(async (resolve) => {
+    keythereum.create({}, dk => {
+      resolve(dk);
+    });
+  });
+}
+
+function createAddress(dk) {
+  return new Promise(async (resolve, reject) => {
+    var createAcctErr;
+    // The dump method needs a password, create one using generateDataKey
+    var newDataKey = await generateDataKey().catch(error => {
+      console.log(error);
+      createAcctErr = true;
+      reject(error);
+    });
+    if (createAcctErr) return;
+    
+    var hashword = newDataKey.Plaintext.toString('base64');
+    keythereum.dump(hashword, dk.privateKey, dk.salt, dk.iv, {}, (keyObject) => {
+      resolve('0x' + keyObject.address);
+    });
+  });
 }
