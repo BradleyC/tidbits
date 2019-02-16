@@ -1,0 +1,7 @@
+.gitignore
+/config
+/scripts
+/migrations
+/build
+.git
+/test

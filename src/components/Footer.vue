@@ -1,6 +1,7 @@
 <template>
   <footer>
-    <span>Created with ♥ by <a href="https://gitlab.com/TrevorJTClarke">@trevorjtclarke</a>, <a href="https://gitlab.com/TrevorJTClarke/truffle-demo-dapp">Fork this Repo!</a></span>
+    <!--Saved for reference <span>Created with ♥ by <a href="https://gitlab.com/TrevorJTClarke">@trevorjtclarke</a>, <a href="https://gitlab.com/TrevorJTClarke/truffle-demo-dapp">Fork this Repo!</a></span>-->
+    <span>INSERT FOOTER HERE</span>
   </footer>
 </template>
 
@@ -18,7 +19,6 @@ footer {
   display: flex;
   padding: 20px 0;
   text-align: center;
-
   span {
     margin: auto;
   }
