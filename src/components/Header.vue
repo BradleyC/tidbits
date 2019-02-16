@@ -5,21 +5,34 @@
     </div>
     <div class="address">
       <span v-if="acct">Account: {{ acct.substring(0, 16) }}...</span>
-      <span v-else>Loading account...</span>
+      <div v-else id="google-signin-hook" />
     </div>
   </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 
 export default {
   name: 'Header',
 
+  mounted() {
+    window.gapi.signin2.render('google-signin-hook', {
+      onsuccess: this.onSignIn
+    })
+  },
   computed: {
     ...mapGetters(['metamask', 'account']),
     acct() {
       return this.metamask && this.account ? this.account : null
+    }
+  },
+  methods: {
+    ...mapActions(['handleLogin']),
+    onSignIn(googleUser) {
+      this.handleLogin(googleUser).catch(error => {
+        console.log(error)
+      })
     }
   }
 }
