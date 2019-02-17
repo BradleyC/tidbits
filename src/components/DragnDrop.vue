@@ -82,7 +82,7 @@ export default {
     },
     saveLyric() {
       this.createLyric({
-        content: this.words.join(' ')
+        content: this.poem
       })
     }
   }

@@ -1,6 +1,6 @@
 import axios from 'axios'
 import Web3 from 'web3'
-import { genWords } from '../utils'
+import { genWords, wordId } from '../utils'
 
 const getAbiDeployedAddress = abi => {
   if (!abi) return ''
@@ -31,9 +31,12 @@ export default {
       }, 1000)
     }
     if (state.retried && !web3Provider) {
-      web3Provider = new Web3(
-        window.web3.givenProvider || `ws://${process.env.RPC_PROVIDER}`
+      web3Provider = new Web3.providers.WebsocketProvider(
+        `ws://${process.env.RPC_PROVIDER}`
       )
+      // web3Provider = new Web3(
+      //   window.web3.givenProvider || `ws://${process.env.RPC_PROVIDER}`
+      // )
     }
     if (web3Provider) {
       window.web3 = new Web3(web3Provider)
@@ -50,22 +53,24 @@ export default {
     }, 3000)
   },
 
-  checkAccount({ commit, state }) {
+  checkAccount({ state }) {
     console.log(state.account)
+    console.log(state.Contract)
     window.web3.eth.getAccounts((error, accounts) => {
+      console.log(accounts)
       if (error) console.error(error)
-      if (state.account !== accounts[0]) {
-        commit('USE_ACCOUNT', accounts[0])
-      } else if (!accounts.length) {
-        commit('USE_ACCOUNT', null)
-      }
+      // if (state.account !== accounts[0]) {
+      //   commit('USE_ACCOUNT', accounts[0])
+      // } else if (!accounts.length) {
+      //   commit('USE_ACCOUNT', null)
+      // }
     })
   },
 
   mountContract({ dispatch, commit, state }) {
     if (state.connected) {
       commit('CLEAR_CONTRACT')
-
+      console.log(state.abi)
       const address = getAbiDeployedAddress(state.abi)
       const contract = new window.web3.eth.Contract(state.abi.abi, address)
       commit('USE_CONTRACT', contract)
@@ -163,10 +168,22 @@ function sendTransaction({ state }, transaction) {
 }
 
 function createLyric({ dispatch, state, commit }, lyric) {
+  var wordInt = ''
+  lyric.content.forEach(v => {
+    var id = wordId(v)
+    var idPrefix
+    if (id < 10) idPrefix = '000'
+    else if (id < 100) idPrefix = '00'
+    else if (id < 1000) idPrefix = '0'
+    else idPrefix = ''
+
+    wordInt += idPrefix + id.toString()
+  })
+  console.log(wordInt)
   return new Promise(async (resolve, reject) => {
     var methodBuild = state.Contract.methods.createLyric(
-      lyric.parent,
-      lyric.content
+      lyric.parent ? lyric.parent : 1000000,
+      wordInt
     )
     var uploadError
     var result = await dispatch('sendTransaction', methodBuild).catch(error => {
@@ -182,14 +199,53 @@ function createLyric({ dispatch, state, commit }, lyric) {
   })
 }
 
-function getAllLyrics({ state, commit }) {
+async function getAllLyrics({ state }) {
+  while (!state.account || !state.Contract) {
+    console.log('waiting for account or Contract in getAllLyrics')
+    await waitForContract()
+  }
   return new Promise(async (resolve, reject) => {
-    // var lyrics = await state.Contract.methods.lyrics
+    var retrieveError
     var lyrics = []
-    for (var i = 5; i > 0; i--) {
-      lyrics.push(genWords(5).join(' '))
+    var lyricObj = {}
+    // var lyrics = await state.Contract.methods.lyricList().call({
+    var lyricsLen = await state.Contract.methods
+      .totalLyrics()
+      .call({
+        from: state.account
+      })
+      .catch(error => {
+        console.log(error)
+        retrieveError = true
+        reject(error)
+      })
+    if (retrieveError) return
+    if (!Number(lyricsLen)) {
+      for (var i = 5; i > 0; i--) {
+        lyrics.push(genWords(5).join(' '))
+      }
+      resolve(lyrics)
+      return
     }
+    for (var j = lyricsLen; j >= 0; j--) {
+      lyricObj = await state.Contract.methods
+        .lyricList(j)
+        .call({
+          from: state.account
+        })
+        .catch(error => {
+          console.log(error)
+          retrieveError = true
+          reject(error)
+        })
+      if (retrieveError) return
+      lyrics.push(lyricObj)
+    }
+    console.log(lyrics)
     resolve(lyrics)
-    console.log(state, commit, reject)
   })
+}
+
+function waitForContract() {
+  return new Promise(resolve => setTimeout(resolve, 200))
 }
