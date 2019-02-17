@@ -18,5 +18,6 @@ export default {
       ref: '0x06012c8cf97bead5deae237070f9587f8e7a266d',
       id: '1066657'
     }
-  ]
+  ],
+  profile: {}
 }

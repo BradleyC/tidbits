@@ -4,9 +4,7 @@
       <div :class="['btn-add', {'open' : open}]" @click="btnClick"><img src="../assets/plus.svg" alt=""></div>
       <p>{{ headertxt }}</p>
     </div>
-    <div v-else>
-
-    </div>
+    <div v-else />
     <div ref="collapseContent" class="words">
       <div v-if="state === 1" class="word-box">
         <Word v-for="word in words" :key="word" :word="word" @word-sel="wordSelected($event)"/>
@@ -69,7 +67,9 @@ export default {
         el.removeAttribute('style')
       }
     },
-    poemFinalized()
+    poemFinalized() {
+      // TODO
+    },
     wordSelected(word) {
       this.state = 2
       console.log(word)

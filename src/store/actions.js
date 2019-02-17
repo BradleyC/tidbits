@@ -50,6 +50,7 @@ export default {
   },
 
   checkAccount({ commit, state }) {
+    console.log(state.account)
     window.web3.eth.getAccounts((error, accounts) => {
       if (error) console.error(error)
       if (state.account !== accounts[0]) {
@@ -105,10 +106,8 @@ export default {
   handleLogin: handleLoginEvent
 }
 
-function handleLoginEvent({ commit, state }, googleUserObj) {
+function handleLoginEvent({ commit }, googleUserObj) {
   var auth = googleUserObj.getAuthResponse()
-  console.log(commit, state)
-  console.log(auth)
   // commit('SET_TOKEN', auth.id_token)
 
   var params = {
@@ -126,8 +125,10 @@ function handleLoginEvent({ commit, state }, googleUserObj) {
       reject(error)
     })
     if (accountError) return
-    console.log(response)
     commit('USE_ACCOUNT', response.data)
+
+    var profile = googleUserObj.getBasicProfile()
+    commit('SET_PROFILE', profile.getEmail())
     resolve(response)
   })
 }
