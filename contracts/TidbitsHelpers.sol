@@ -8,12 +8,12 @@ contract TidbitsHelpers {
     mapping (address => bool) signers;
     address[] signerList;
 
-    function addToOwners(address newOwner) public onlyOwner(newOwner) {
+    function addToOwners(address newOwner) public onlyOwner() {
         owners[newOwner] = true;
         ownerList.push(newOwner);
     }
 
-    function addToSigners(address newSigner) public onlyOwner(newSigner) {
+    function addToSigners(address newSigner) public onlyOwner() {
         signers[newSigner] = true;
         signerList.push(newSigner);
     }
@@ -34,13 +34,13 @@ contract TidbitsHelpers {
         return signerList;
     }
 
-    modifier onlyOwner(address _address) {
-        require (owners[_address] == true, "you do not pass the test of power!");
+    modifier onlyOwner() {
+        require (owners[msg.sender] == true, "you do not pass the test of power!");
         _;
     }
 
-    modifier onlySigner(address _address) {
-        require (signers[_address] == true, "you are strong yet still do not pass the test of power!");
+    modifier onlySigner() {
+        require (signers[msg.sender] == true, "you are strong yet still do not pass the test of power!");
         _;
     }
 }
