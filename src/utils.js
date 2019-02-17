@@ -14,3 +14,6 @@ export function genWords(n) {
 export function randomIntInc(low, high) {
   return Math.floor(Math.random() * (high - low + 1) + low)
 }
+export function wordId(word) {
+  return wordlist.indexOf(word)
+}
