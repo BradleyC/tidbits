@@ -17,7 +17,6 @@ contract TidbitsCore is ERC20, TidbitsHelpers {
     mapping (address => uint256[]) addressToLyrics;
     mapping (uint256 => address) lyricToAddress;
 
-    // create
     function createLyric(uint256 _parentLyric, uint128 _lyrics) public payable {
         uint256 startGas = gasleft();
         address payable _sender = msg.sender;
@@ -40,9 +39,20 @@ contract TidbitsCore is ERC20, TidbitsHelpers {
         return addressToLyrics[_address];
     }
 
-uint256 public maxBatchDepth;
+    /* Method to receive transaction */
+    function receiveVerification(address _contract, uint256 amount) public {
+        require(registeredApplications[_contract] == true, "verification without registration is meaningless");
+        contractGasReserve = contractGasReserve + amount;
+    }
+
+    /* @dev GasAndAccountManager .
+        Intended to be a standalone contract, but migration trouble and time constraints
+        require a long and dirty file for now. */
+
+    uint256 public maxBatchDepth;
     uint256 public stackDepth;
     uint256 public baseGasProvision;
+    uint256 public contractGasReserve;
 
     address[] public gasManagedContracts;
     address[] public registeredUsers;
@@ -72,26 +82,6 @@ uint256 public maxBatchDepth;
 
     Action[] public actions;
 
-    function registerAction(uint256 action) public onlyRegisteredApplication returns (bool success) {
-        Action memory a = Action({
-            actionId: action,
-            gasCost: 0
-        });
-        actions.push(a);
-        updateStack();
-        return success;
-    }
-
-    function registerActionWithGasCost(uint256 action, uint256 gas) public onlyRegisteredApplication returns (bool success) {
-        Action memory a = Action({
-            actionId: action,
-            gasCost: gas
-        });
-        actions.push(a);
-        updateStack();
-        return success;
-    }
-
     function registerActionAndPassGas(
         uint256 action, 
         uint256 gas,
@@ -116,14 +106,13 @@ uint256 public maxBatchDepth;
     }
 
     function payUser(address payable user, uint256 value) private {
-        uint256 balance = address(this).balance;
+        uint256 balance = contractGasReserve;
         if (value == 0) {
             value = baseGasProvision;
         }
         require(balance > value, "this chain has run out of funds. please contact your admin.");
         user.transfer(value);
-        uint256 currentBalance = address(this).balance;
-        emit currentGas(currentBalance);
+        contractGasReserve = balance - value;
     }
 
     event currentGas(uint256 balance);
