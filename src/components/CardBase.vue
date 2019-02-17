@@ -18,7 +18,6 @@ export default {
 </script>
 <style lang="sass">
     .card-comp
-        width: 100%
         height: min-content
         text-align: center
         font-size: 4vw

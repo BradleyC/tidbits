@@ -3,7 +3,7 @@ export function genWords(n) {
   let i = 0
   let words = []
   while (i < n) {
-    let word = wordlist[this.randomIntInc(0, 2048)]
+    let word = wordlist[randomIntInc(0, 2048)]
     if (words.indexOf(word) < 0) {
       words.push(word)
       i++
