@@ -1,0 +1,11 @@
+.env
+.git
+*.log
+haters/
+.editorconfig
+dist
+node_modules
+.idea/
+/build/contracts
+.scratch
+.remote

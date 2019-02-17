@@ -1,7 +1,7 @@
 {
-  "name": "truffle-demo-dapp",
-  "version": "0.0.1",
-  "description": "A quick dapp built to showcase amberdata at trufflecon!",
+  "name": "Tidbits",
+  "version": "0.1.0",
+  "description": "The framework for authentic human community",
   "main": "index.js",
   "directories": {
     "test": "test"
@@ -24,13 +24,21 @@
     "blockchain",
     "smart contracts"
   ],
-  "author": "@trevorjtclarke",
-  "license": "Apache",
+  "author": "@bradleyc, @gabeibarra, @taylorjdawson",
+  "license": "none",
   "dependencies": {
+    "acorn": "^6.1.0",
     "axios": "^0.18.0",
     "dotenv": "^6.0.0",
+    "ganache-cli": "^6.2.5",
+    "openzeppelin-solidity": "^2.1.2",
+    "scrypt": "^6.0.3",
+    "truffle": "^5.0.4",
     "truffle-hdwallet-provider": "0.0.6",
+    "typeface-domine": "0.0.54",
     "vue": "^2.5.17",
+    "vue-analytics": "^5.16.1",
+    "vue-animejs": "^2.0.0",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1",
     "web3": "^1.0.0-beta.36",
@@ -99,7 +107,8 @@
     "webpack-cli": "^3.1.1",
     "webpack-dev-middleware": "^3.4.0",
     "webpack-hot-middleware": "^2.24.2",
-    "webpack-merge": "^4.1.4"
+    "webpack-merge": "^4.1.4",
+    "websocket": "^1.0.28"
   },
   "engines": {
     "node": ">= 8.11.3",

@@ -1,3 +1,4 @@
+import axios from 'axios'
 import Web3 from 'web3'
 
 const getAbiDeployedAddress = abi => {
@@ -49,6 +50,7 @@ export default {
   },
 
   checkAccount({ commit, state }) {
+    console.log(state.account)
     window.web3.eth.getAccounts((error, accounts) => {
       if (error) console.error(error)
       if (state.account !== accounts[0]) {
@@ -99,5 +101,34 @@ export default {
           resolve(e)
         })
     })
+  },
+
+  handleLogin: handleLoginEvent
+}
+
+function handleLoginEvent({ commit }, googleUserObj) {
+  var auth = googleUserObj.getAuthResponse()
+  // commit('SET_TOKEN', auth.id_token)
+
+  var params = {
+    method: 'GET',
+    url: `${process.env.SIGNING_ENDPOINT}/login`,
+    headers: {
+      Authorization: auth.id_token
+    }
   }
+  return new Promise(async (resolve, reject) => {
+    var accountError
+    var response = await axios(params).catch(error => {
+      console.log(error)
+      accountError = true
+      reject(error)
+    })
+    if (accountError) return
+    commit('USE_ACCOUNT', response.data)
+
+    var profile = googleUserObj.getBasicProfile()
+    commit('SET_PROFILE', profile.getEmail())
+    resolve(response)
+  })
 }
