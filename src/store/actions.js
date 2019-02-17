@@ -128,8 +128,6 @@ function handleLoginEvent({ commit }, googleUserObj) {
     commit('USE_ACCOUNT', response.data)
 
     var profile = googleUserObj.getBasicProfile()
-    console.log(profile)
-    console.log(profile.getEmail())
     commit('SET_PROFILE', profile.getEmail())
     resolve(response)
   })
