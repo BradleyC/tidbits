@@ -1,5 +1,6 @@
 import axios from 'axios'
 import Web3 from 'web3'
+import { genWords } from '../utils'
 
 const getAbiDeployedAddress = abi => {
   if (!abi) return ''
@@ -105,7 +106,8 @@ export default {
 
   handleLogin: handleLoginEvent,
   sendTransaction: sendTransaction,
-  createLyric: createLyric
+  createLyric: createLyric,
+  getAllLyrics: getAllLyrics
 }
 
 function handleLoginEvent({ commit }, googleUserObj) {
@@ -177,5 +179,17 @@ function createLyric({ dispatch, state, commit }, lyric) {
 
     commit('SET_LYRIC', lyric)
     resolve(true)
+  })
+}
+
+function getAllLyrics({ state, commit }) {
+  return new Promise(async (resolve, reject) => {
+    // var lyrics = await state.Contract.methods.lyrics
+    var lyrics = []
+    for (var i = 5; i > 0; i--) {
+      lyrics.push(genWords(5).join(' '))
+    }
+    resolve(lyrics)
+    console.log(state, commit, reject)
   })
 }
