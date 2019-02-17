@@ -19,19 +19,19 @@ contract TidbitsCore is ERC20, TidbitsHelpers {
 
     // create
     function createLyric(uint256 _parentLyric, uint128 _lyrics) public payable {
-        uint256 startGas = gasleft();
+        // uint256 startGas = gasleft();
         address payable _sender = msg.sender;
         Lyric memory lyric = Lyric({
             parentLyric: _parentLyric,
             lyrics: _lyrics,
             lyricOwner: _sender
         });
-        totalLyrics = lyricList.push(lyric) - 1;
+        totalLyrics = lyricList.push(lyric);
         addressToLyrics[_sender].push(totalLyrics);
         lyricToAddress[totalLyrics] = _sender;
         emit newLyric(totalLyrics, _parentLyric, _lyrics, _sender);
         ERC20.transfer(address(this), 5);
-        registerActionAndPassGas(uint256(1), startGas, uint256(0), _sender); 
+        // registerActionAndPassGas(uint256(1), startGas, uint256(0), _sender); 
     }
 
     event newLyric(uint256 lyricId, uint256 parentLyric, uint128 lyrics, address lyricOwner);

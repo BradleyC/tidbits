@@ -43,7 +43,8 @@ export default {
   },
   SET_TOKEN: setIdToken,
   SET_PROFILE: setProfile,
-  SET_LYRIC: setLyric
+  SET_LYRIC: setLyric,
+  UPDATE_BALANCE: updateBalance
 }
 
 function setProfile(state, email) {
@@ -56,4 +57,7 @@ function setIdToken(state, idToken) {
 }
 function setLyric(state, lyric) {
   state.lyrics.push(lyric)
+}
+function updateBalance(state, balance) {
+  state.balance = balance
 }

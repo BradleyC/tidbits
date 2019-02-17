@@ -5,9 +5,9 @@
       <h2 class="app-name">tidbits</h2>
     </div>
     <div class="address">
-      <span v-if="account">{{ account }}</span>
       <span v-if="account">Auth'd as:</span>
       <span v-if="account">{{ profile.email }}</span>
+      <span v-if="account && balance !== null">Balance: {{ balance }}</span>
       <div v-else id="google-signin-hook" />
     </div>
   </div>
@@ -25,7 +25,7 @@ export default {
     })
   },
   computed: {
-    ...mapGetters(['account', 'profile'])
+    ...mapGetters(['account', 'profile', 'balance'])
   },
   methods: {
     ...mapActions(['handleLogin']),

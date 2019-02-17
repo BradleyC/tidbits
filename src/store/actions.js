@@ -112,10 +112,11 @@ export default {
   handleLogin: handleLoginEvent,
   sendTransaction: sendTransaction,
   createLyric: createLyric,
-  getAllLyrics: getAllLyrics
+  getAllLyrics: getAllLyrics,
+  getBalance: getBalance
 }
 
-function handleLoginEvent({ commit }, googleUserObj) {
+function handleLoginEvent({ commit, dispatch }, googleUserObj) {
   var auth = googleUserObj.getAuthResponse()
   commit('SET_TOKEN', auth.id_token)
 
@@ -138,6 +139,10 @@ function handleLoginEvent({ commit }, googleUserObj) {
 
     var profile = googleUserObj.getBasicProfile()
     commit('SET_PROFILE', profile.getEmail())
+
+    await dispatch('getBalance').catch(error => {
+      console.log(error)
+    })
     resolve(response)
   })
 }
@@ -220,6 +225,7 @@ async function getAllLyrics({ state }) {
         reject(error)
       })
     if (retrieveError) return
+    console.log(lyricsLen)
     if (!Number(lyricsLen)) {
       for (var i = 5; i > 0; i--) {
         lyrics.push(genWords(5).join(' '))
@@ -239,6 +245,7 @@ async function getAllLyrics({ state }) {
           reject(error)
         })
       if (retrieveError) return
+      console.log(lyricObj)
       lyrics.push(lyricObj)
     }
     console.log(lyrics)
@@ -248,4 +255,23 @@ async function getAllLyrics({ state }) {
 
 function waitForContract() {
   return new Promise(resolve => setTimeout(resolve, 200))
+}
+
+function getBalance({ commit, state }) {
+  console.log(state.Contract)
+  return new Promise(async (resolve, reject) => {
+    var balanceError
+    var balance = await state.Contract.methods
+      .balanceOf(state.account)
+      .call({ from: state.account })
+      .catch(error => {
+        console.log(error)
+        balanceError = true
+        reject(error)
+      })
+    if (balanceError) return
+    console.log(balance)
+    commit('UPDATE_BALANCE', balance)
+    resolve(balance)
+  })
 }

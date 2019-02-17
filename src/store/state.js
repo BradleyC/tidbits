@@ -21,5 +21,6 @@ export default {
   ],
   idToken: '',
   profile: {},
-  lyrics: []
+  lyrics: [],
+  balance: null
 }
