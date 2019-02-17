@@ -103,12 +103,14 @@ export default {
     })
   },
 
-  handleLogin: handleLoginEvent
+  handleLogin: handleLoginEvent,
+  sendTransaction: sendTransaction,
+  createLyric: createLyric
 }
 
 function handleLoginEvent({ commit }, googleUserObj) {
   var auth = googleUserObj.getAuthResponse()
-  // commit('SET_TOKEN', auth.id_token)
+  commit('SET_TOKEN', auth.id_token)
 
   var params = {
     method: 'GET',
@@ -130,5 +132,50 @@ function handleLoginEvent({ commit }, googleUserObj) {
     var profile = googleUserObj.getBasicProfile()
     commit('SET_PROFILE', profile.getEmail())
     resolve(response)
+  })
+}
+
+function sendTransaction({ state }, transaction) {
+  var params = {
+    method: 'POST',
+    url: `${process.env.SIGNING_ENDPOINT}/transact`,
+    headers: {
+      Authorization: state.idToken
+    },
+    data: {
+      contract: state.Contract._address,
+      transaction: transaction.encodeABI()
+    }
+  }
+  console.log(params)
+  return new Promise((resolve, reject) => {
+    axios(params)
+      .then(response => {
+        resolve(response)
+      })
+      .catch(e => {
+        console.log(e)
+        reject(e)
+      })
+  })
+}
+
+function createLyric({ dispatch, state, commit }, lyric) {
+  return new Promise(async (resolve, reject) => {
+    var methodBuild = state.Contract.methods.createLyric(
+      lyric.parent,
+      lyric.content
+    )
+    var uploadError
+    var result = await dispatch('sendTransaction', methodBuild).catch(error => {
+      console.log(error)
+      uploadError = true
+      reject(error)
+    })
+    if (uploadError) return
+    console.log(result)
+
+    commit('SET_LYRIC', lyric)
+    resolve(true)
   })
 }

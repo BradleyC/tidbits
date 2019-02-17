@@ -7,36 +7,39 @@
     <div class="word-list">
       <Word v-for="word in words" :key="word" :word="word" @word-sel="moveWord($event)"/>
     </div>
-    <div class="save" :class="toggleActive()">Save</div>
+    <button class="btn btn-danger save" :disabled="disable()" :class="toggleActive()" @click="saveLyric">Save</button>
   </div>
 </template>
 
 <script>
+import { mapActions } from 'vuex'
+import { genWords } from '../utils'
 import Word from './Word'
 export default {
   name: 'DragnDrop',
   components: {
     Word
   },
+  props: {
+    poemObj: {
+      type: Array,
+      default() {
+        return []
+      }
+    }
+  },
   data() {
     return {
       poem: [],
-      words: [
-        'random',
-        'places',
-        'trout',
-        'camera',
-        'gouge',
-        'poodle',
-        'satchel',
-        'tonight',
-        'thoughtless',
-        'vacuum'
-      ],
+      words: [],
       poemMaxLength: 5
     }
   },
+  created() {
+    this.words = genWords(25)
+  },
   methods: {
+    ...mapActions(['createLyric']),
     allowDrop(ev) {
       ev.preventDefault()
     },
@@ -46,6 +49,9 @@ export default {
       console.log('data --> ' + data)
       ev.target.appendChild(document.getElementById(data))
       console.log('ev.target --> ' + ev.target)
+    },
+    disable() {
+      return this.poem.length !== this.poemMaxLength
     },
     toggleActive() {
       return {
@@ -57,10 +63,13 @@ export default {
       if (this.poem.indexOf(word) > -1) {
         this.addWord(this.words, word)
         this.removeWord(this.poem, word)
-      } else if (this.poem.length < 5) {
+      } else if (this.poem.length < this.poemMaxLength) {
         this.addWord(this.poem, word)
         this.removeWord(this.words, word)
       }
+      // clear out original object without replacing reference for parent component?
+      for (var i = 0; i < this.poemObj.length; i++) this.poemObj.pop()
+      for (var j = 0; j < this.poem.length; j++) this.poemObj.push(this.poem[j])
     },
     addWord(array, word) {
       array.push(word)
@@ -70,6 +79,11 @@ export default {
       if (index > -1) {
         array.splice(index, 1)
       }
+    },
+    saveLyric() {
+      this.createLyric({
+        content: this.words.join(' ')
+      })
     }
   }
 }
@@ -95,6 +109,8 @@ export default {
         padding-right: 20px
     .active
         color: black
+        cursor: pointer
     .inactive
         color: lightgrey
+        cursor: unset
 </style>

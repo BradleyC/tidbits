@@ -22,8 +22,10 @@ module.exports = {
   // REF http://truffleframework.com/docs/advanced/configuration
   networks: {
     development: {
+      address: '0xbf525A808049976832813F72a5E9c6CBeaAc1091',
       host: 'localhost',
-      port: 8545,
+      port: 8543,
+      gas: 6000000,
       network_id: '*' // Match any network id
     },
     rinkeby: {

@@ -9,11 +9,12 @@
       <div v-if="state === 1" class="word-box">
         <Word v-for="word in words" :key="word" :word="word" @word-sel="wordSelected($event)"/>
       </div>
-      <DragnDrop ref="dragNDrop" v-if="state === 2" @poem-finalized="poemFinalized($event)"/>
+      <DragnDrop :poem-obj="poemObj" ref="dragNDrop" v-if="state === 2" @poem-finalized="poemFinalized($event)"/>
     </div>
   </CardBase>
 </template>
 <script>
+import { mapActions } from 'vuex'
 import CardBase from './CardBase'
 import Word from './Word'
 import DragnDrop from './DragnDrop'
@@ -27,7 +28,8 @@ export default {
     return {
       words: ['zoo', 'time', 'acrobat', 'chance', 'tinker'],
       open: false,
-      state: 0
+      state: 0,
+      poemObj: []
     }
   },
   computed: {
@@ -38,13 +40,14 @@ export default {
         case 1:
           return 'Pick your seed...'
         case 2:
-          return 'Build you poem...'
+          return 'Build your poem...'
         case 3:
           return ''
       }
     }
   },
   methods: {
+    ...mapActions(['createLyric', 'handleLogin']),
     btnClick() {
       if (this.state === 0) {
         this.open = true
@@ -68,7 +71,10 @@ export default {
       }
     },
     poemFinalized() {
-      // TODO
+      console.log(this.poemObj)
+      // this.createLyric({
+      //   content: this.words.join(' ')
+      // })
     },
     wordSelected(word) {
       this.state = 2

@@ -1,13 +1,15 @@
-const ERC998 = artifacts.require('./contracts/ERC998.sol')
-const nonspec = artifacts.require('./contracts/nonspecERC721.sol')
+const GasAndAccountManager = artifacts.require('./contracts/GasAndAccountManager.sol')
+const TidbitsCore = artifacts.require('./contracts/TidbitsCore.sol')
+const TidbitsHelpers = artifacts.require('./contracts/TidbitsHelpers.sol')
 
 module.exports = async deployer => {
-  // deploy core contract
-  await deployer.deploy(ERC998)
+  await deployer.deploy(TidbitsHelpers)
   // console.log('Contract address:', c.address)
 
-  // link dependencies
-  deployer.link(ERC998, [nonspec])
+  deployer.link(TidbitsHelpers, [GasAndAccountManager])
+  await deployer.deploy(GasAndAccountManager, 30, 5000)
+  
+  deployer.link(GasAndAccountManager, [TidbitsCore])
 
-  // deploy dependencies
-  await deployer.deploy(nonspec)
+  await deployer.deploy(TidbitsCore)
+}

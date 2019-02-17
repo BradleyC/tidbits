@@ -41,11 +41,19 @@ export default {
       state.items = arr
     }
   },
-  SET_PROFILE: setProfile
+  SET_TOKEN: setIdToken,
+  SET_PROFILE: setProfile,
+  SET_LYRIC: setLyric
 }
 
 function setProfile(state, email) {
   state.profile = {
     email: email
   }
+}
+function setIdToken(state, idToken) {
+  state.idToken = idToken
+}
+function setLyric(state, lyric) {
+  state.lyrics.push(lyric)
 }

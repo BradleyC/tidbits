@@ -19,5 +19,7 @@ export default {
       id: '1066657'
     }
   ],
-  profile: {}
+  idToken: '',
+  profile: {},
+  lyrics: []
 }
