@@ -7,5 +7,7 @@ export default {
   // w3Data: state => state.w3Data,
   abi: state => state.abi,
   items: state => state.items,
-  profile: state => state.profile
+  idToken: state => state.idToken,
+  profile: state => state.profile,
+  lyrics: state => state.lyrics
 }
