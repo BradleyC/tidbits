@@ -40,5 +40,12 @@ export default {
       arr.splice(idx, 1)
       state.items = arr
     }
+  },
+  SET_PROFILE: setProfile
+}
+
+function setProfile(state, email) {
+  state.profile = {
+    email: email
   }
 }

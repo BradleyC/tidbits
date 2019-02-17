@@ -1,11 +1,13 @@
 <template>
   <div class="header">
+    <div />
     <div class="logo">
-      <h3>🌌 Demo dApp</h3>
+      <h2 class="app-name">tidbits</h2>
     </div>
     <div class="address">
-      <span v-if="acct">Account: {{ acct.substring(0, 16) }}...</span>
-      <div v-else id="google-signin-hook" />
+      <span v-if="account">{{ account }}</span>
+      <span v-if="account">{{ profile.email }}</span>
+      <div id="google-signin-hook" />
     </div>
   </div>
 </template>
@@ -22,10 +24,7 @@ export default {
     })
   },
   computed: {
-    ...mapGetters(['metamask', 'account']),
-    acct() {
-      return this.metamask && this.account ? this.account : null
-    }
+    ...mapGetters(['account', 'profile'])
   },
   methods: {
     ...mapActions(['handleLogin']),
@@ -48,19 +47,38 @@ export default {
   justify-content: space-between;
   padding: 10px 0;
 
+  .logo {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+  }
+  .app-name {
+    font-family: 'Cedarville Cursive', cursive;
+    font-size: 2em;
+    font-weight: unset;
+    margin: unset;
+  }
   .logo,
   .address {
     margin: 0 20px;
   }
 
   .address {
+    align-items: flex-end;
     display: flex;
+    flex-direction: column;
+    margin: unset;
+    position: absolute;
+    right: 0;
 
     span {
       color: $color1;
       margin: auto 10px;
-      font-size: 12pt;
+      font-size: 8pt;
     }
+  }
+  #google-signin-hook {
+    padding-right: 10px;
   }
 }
 </style>

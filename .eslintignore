@@ -1,5 +1,3 @@
-../build/*.js
-./*.js
 .gitignore
 /config
 /scripts
@@ -7,4 +5,3 @@
 /build
 .git
 /test
-/lambda

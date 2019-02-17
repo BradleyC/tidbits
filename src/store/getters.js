@@ -6,5 +6,6 @@ export default {
   Contract: state => state.Contract,
   // w3Data: state => state.w3Data,
   abi: state => state.abi,
-  items: state => state.items
+  items: state => state.items,
+  profile: state => state.profile
 }
