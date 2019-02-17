@@ -6,8 +6,9 @@
     </div>
     <div class="address">
       <span v-if="account">{{ account }}</span>
+      <span v-if="account">Auth'd as:</span>
       <span v-if="account">{{ profile.email }}</span>
-      <div id="google-signin-hook" />
+      <div v-else id="google-signin-hook" />
     </div>
   </div>
 </template>
