@@ -5,10 +5,18 @@
       <h2 class="app-name">tidbits</h2>
     </div>
     <div class="address">
-      <span v-if="account">{{ account }}</span>
-      <span v-if="account">Auth'd as:</span>
-      <span v-if="account">{{ profile.email }}</span>
-      <div v-else id="google-signin-hook" />
+      <div v-if="!profile.email" id="google-signin-hook" />
+
+      <!--<div class="blockie">-->
+      <!--<div :class="g0"/>-->
+      <!--<div :class="g1"/>-->
+      <!--<div :class="g2"/>-->
+      <!--<div :class="g3"/>-->
+      <!--<div :class="g4"/>-->
+      <!--<div :class="g5"/>-->
+      <!--<div :class="g6"/>-->
+      <!--</div>-->
+
     </div>
   </div>
 </template>
@@ -32,6 +40,8 @@ export default {
     onSignIn(googleUser) {
       this.handleLogin(googleUser).catch(error => {
         console.log(error)
+        console.log('account', this.account)
+        console.log('email', this.profile.email)
       })
     }
   }
@@ -54,7 +64,6 @@ export default {
     width: 100%;
   }
   .app-name {
-    font-family: 'Cedarville Cursive', cursive;
     font-size: 2em;
     font-weight: unset;
     margin: unset;
@@ -71,6 +80,12 @@ export default {
     margin: unset;
     position: absolute;
     right: 0;
+    .blockie {
+      display: grid;
+      grid-template-rows: 5px 5px;
+      grid-template-columns: 5px 5px;
+      padding-right: 10px;
+    }
 
     span {
       color: $color1;

@@ -1,7 +1,8 @@
 <template>
   <CardBase>
     <div v-if="state !== 3" class="header" slot="header">
-      <div :class="['btn-add', {'open' : open}]" @click="btnClick"><img src="../assets/plus.svg" alt=""></div>
+      <!--<div :class="['btn-add', {'open' : open}]" @click="btnClick"><img src="../assets/plus.svg" alt=""></div>-->
+      <div :class="['btn-add', {'open' : open}]" @click="btnClick">$5</div>
       <p>{{ headertxt }}</p>
     </div>
     <div v-else />
@@ -88,17 +89,20 @@ export default {
   .header
     display: flex
     .btn-add
-      img
-        display: grid
-        width: 50px
       transition: all 320ms ease
       display: grid
-      grid-template-columns: auto 1fr
       align-items: center
       cursor: pointer
-
+      background-color: grey
+      color: white
+      box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12)
+      border-radius: 5px
+      width: 50px
+      height: 50px
     .open.btn-add
-      transform: rotate(45deg)
+      transform: translateY(-10px)
+      opacity: 0
+
     p
       margin-left: 15px
   .words
