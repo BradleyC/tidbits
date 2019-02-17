@@ -3,7 +3,7 @@ pragma solidity ^0.5.0;
 import "./GasAndAccountManager.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 
-contract TidbitsCore is GasAndAccountManager, TidbitsHelper, ERC20 {
+contract TidbitsCore is GasAndAccountManager, ERC20 {
     string public name = "Tidbit";
     string public symbol = "TDBT";
     // who even wants to count pennies anyway!?!
@@ -33,7 +33,7 @@ contract TidbitsCore is GasAndAccountManager, TidbitsHelper, ERC20 {
         });
         totalLyrics = lyrics.push(lyric) - 1;
         addressToLyrics[sender].push(totalLyrics);
-        lyricsToAddress[totalLyrics] = sender;
+        lyricToAddress[totalLyrics] = sender;
         emit newLyric(totalLyrics, _parentLyric, _lyrics, sender);
         transfer(address(this), 5);
         registerActionAndPassGas(1, startGas, 0, sender); 
@@ -41,11 +41,11 @@ contract TidbitsCore is GasAndAccountManager, TidbitsHelper, ERC20 {
 
     event newLyric(uint256 lyricId, uint256 parentLyric, uint128 lyrics, address lyricOwner);
 
-    function getLyricsByAddress(address _address) pure returns (uint256[]) {
+    function getLyricsByAddress(address _address) public view returns (uint256[] memory) {
         return addressToLyrics[_address];
     }
 
     constructor () public {
-        _mint(msg.sender, INITIALSUPPLY);
+        _mint(msg.sender, INITIAL_SUPPLY);
     }
 }
