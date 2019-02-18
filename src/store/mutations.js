@@ -59,5 +59,5 @@ function setLyric(state, lyric) {
   state.lyrics.push(lyric)
 }
 function updateBalance(state, balance) {
-  state.balance = balance
+  state.balance = Number(balance)
 }

@@ -17,7 +17,10 @@
       <!--</div>-->
       <span v-if="account">{{ profile.email }}</span>
       <span v-if="account && balance !== null">Balance: {{ balance }}</span>
-      <div v-else id="google-signin-hook" />
+      <button v-if="account && !balance"
+              class="btn"
+              style="background: orange"
+              @click="claim">CLAIM YOUR 500 TOKENS</button>
       <div v-if="!profile.email" id="google-signin-hook" />
 
     </div>
@@ -39,13 +42,16 @@ export default {
     ...mapGetters(['account', 'profile', 'balance'])
   },
   methods: {
-    ...mapActions(['handleLogin']),
+    ...mapActions(['handleLogin', 'issueNewUserTokens']),
     onSignIn(googleUser) {
       this.handleLogin(googleUser).catch(error => {
         console.log(error)
         console.log('account', this.account)
         console.log('email', this.profile.email)
       })
+    },
+    async claim() {
+      await this.issueNewUserTokens()
     }
   }
 }

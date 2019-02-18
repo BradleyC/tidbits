@@ -113,7 +113,8 @@ export default {
   sendTransaction: sendTransaction,
   createLyric: createLyric,
   getAllLyrics: getAllLyrics,
-  getBalance: getBalance
+  getBalance: getBalance,
+  issueNewUserTokens: issueNewUserTokens
 }
 
 function handleLoginEvent({ commit, dispatch }, googleUserObj) {
@@ -258,7 +259,6 @@ function waitForContract() {
 }
 
 function getBalance({ commit, state }) {
-  console.log(state.Contract)
   return new Promise(async (resolve, reject) => {
     var balanceError
     var balance = await state.Contract.methods
@@ -273,5 +273,31 @@ function getBalance({ commit, state }) {
     console.log(balance)
     commit('UPDATE_BALANCE', balance)
     resolve(balance)
+  })
+}
+
+function issueNewUserTokens({ commit, dispatch, state }) {
+  return new Promise(async (resolve, reject) => {
+    var params = {
+      method: 'POST',
+      url: `${process.env.SIGNING_ENDPOINT}/transact`,
+      headers: {
+        Authorization: state.idToken
+      },
+      data: {
+        special: true
+      }
+    }
+    var transactionErr
+    console.log(params)
+    var response = await axios(params).catch(e => {
+      console.log(e)
+      transactionErr = true
+      reject(e)
+    })
+    if (transactionErr) return
+    console.log(response)
+    dispatch('sendTransaction')
+    console.log(commit, resolve)
   })
 }
