@@ -6,9 +6,28 @@ var merge = require('webpack-merge')
 var baseWebpackConfig = require('./webpack.base.conf')
 var CopyWebpackPlugin = require('copy-webpack-plugin')
 var HtmlWebpackPlugin = require('html-webpack-plugin')
-var ExtractTextPlugin = require('extract-text-webpack-plugin')
+// var ExtractTextPlugin = require('extract-text-webpack-plugin')
 var OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const MiniCssExtractPlugin = require("mini-css-extract-plugin")
+
+// Fixes here were to deal with Webpack 3 > 4 issues.
+// Warnings that need to be dealt with:
+// WARNING in asset size limit: The following asset(s) exceed the recommended size limit (244 KiB).
+// This can impact web performance.
+// Assets: 
+//   static/js/app.6257a9fd507ca812ff5c.js (1.32 MiB)
+
+// WARNING in entrypoint size limit: The following entrypoint(s) combined asset size exceeds the recommended limit (244 KiB). This can impact web performance.
+// Entrypoints:
+//   app (1.32 MiB)
+//       static/js/app.6257a9fd507ca812ff5c.js
+
+
+// WARNING in webpack performance recommendations: 
+// You can limit the size of your bundles by using import() or require.ensure to lazy load some parts of your application.
+// For more info visit https://webpack.js.org/guides/code-splitting/
 
 var env =
   process.env.NODE_ENV === 'testing'
@@ -16,12 +35,14 @@ var env =
     : config.build.env
 
 var webpackConfig = merge(baseWebpackConfig, {
+  mode: 'production',
   module: {
-    rules: utils.styleLoaders({
-      sourceMap: config.build.productionSourceMap,
-      extract: true,
-      // use: 'vue-style-loader'
-    }),
+    rules: [
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader'
+      },
+    ]
   },
   devtool: config.build.productionSourceMap ? '#source-map' : false,
   output: {
@@ -55,10 +76,12 @@ var webpackConfig = merge(baseWebpackConfig, {
     new webpack.DefinePlugin({
       'process.env': env,
     }),
+    new VueLoaderPlugin(),
     // extract css into its own file
-    new ExtractTextPlugin({
-      filename: utils.assetsPath('css/[name].[contenthash].css'),
-    }),
+    // new ExtractTextPlugin({
+    //   filename: utils.assetsPath('css/[name].[contenthash].css'),
+    // }),
+    new MiniCssExtractPlugin(),
     // Compress extracted CSS. We are using this plugin so that possible
     // duplicated CSS from different components can be deduped.
     new OptimizeCSSPlugin({
