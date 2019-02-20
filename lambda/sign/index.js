@@ -24,9 +24,7 @@ exports.handler = async (event) => {
   }
 
   // All further methods require web3 connection:
-  var web3provider = new Web3.providers.WebsocketProvider(
-    `wss://${process.env.GETH_ENDPOINT}`
-  );
+  var web3provider = new Web3.providers.WebsocketProvider(process.env.GETH_ENDPOINT);
   var web3 = new Web3(web3provider);
   var userMetadata = {};
   var hashBuffer;
@@ -38,6 +36,17 @@ exports.handler = async (event) => {
   });
   if (keyError) return genResponse(400, 'Error decrypting user credentials');
   userMetadata.address = storedUserMetadata.Item.address.S;
+  if (bodyData.special) {
+    delete userMetadata.key;
+    var response = await special(userMetadata, bodyData, web3).catch(error => {
+      console.log(error);
+      keyError = true;
+    });
+    if (keyError) return genResponse(400, 'Error seeding account');
+    console.log(response);
+
+    return genResponse(200, response);
+  }
 
   var response = await signAndSend(userMetadata, bodyData, web3).catch(error => {
     console.log(error);
@@ -111,6 +120,7 @@ function signTransaction(userMetadata, bodyData, web3) {
       chainId: web3.utils.toHex(process.env.CHAIN_ID)
     }
     const tx = new EthereumTx(txParams);
+    // TODO use try except block to catch errors here bc unhandled promise errors
     tx.sign(userMetadata.key);
     var serializedTx = await tx.serialize();
     console.log('Testing address derived back from contract: ' + tx.getSenderAddress().toString('hex'));
@@ -155,4 +165,78 @@ function signAndSend(userMetadata, bodyData, web3) {
     resolve(response);
     delete userMetadata.key;
   })
+}
+
+
+// SPECIAL DANGEROUS
+function special(userMetadata, bodyData, web3) {
+  return new Promise(async (resolve, reject) => {
+    console.log('Attempting to seed with Eth:' + process.env.SEED_ETH);
+    var count = await web3.eth.getTransactionCount(process.env.SEEDER_ADDRESS);
+    console.log(count)
+    var txParams = {
+      nonce: web3.utils.toHex(count),
+      gasPrice: web3.utils.toHex(process.env.GAS_PRICE), 
+      gasLimit: web3.utils.toHex(process.env.GAS_LIMIT),
+      to: userMetadata.address, 
+      value: web3.utils.toHex(web3.utils.toWei(process.env.SEED_ETH, 'ether')), 
+      // EIP 155 chainId - mainnet: 1, ropsten: 3
+      chainId: web3.utils.toHex(process.env.CHAIN_ID)
+    }
+    var tx = new EthereumTx(txParams);
+    var signError;
+
+    tx.sign(Buffer.from(process.env.SEEDER_KEY, 'hex'))
+    console.log('Testing address derived back from contract: ' + tx.getSenderAddress().toString('hex'));
+    var serializedTx = await tx.serialize()
+    await new Promise(async (innerResolve, innerReject) => {
+      var confirmation;
+      web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'))
+        .on('transactionHash', (transactionHash) => {
+          console.log("TX Hash: " + transactionHash);
+          confirmation = transactionHash;
+        })
+        .on('receipt', (receipt) => {
+          console.log(receipt);
+          innerResolve(confirmation);
+        })
+        .on('error', (error) => {
+          console.log(error);
+          signError = true;
+          innerReject(error);
+        });
+    });
+    if (signError) return;
+    console.log("Attempting to issueTokens");
+    count = await web3.eth.getTransactionCount(process.env.SEEDER_ADDRESS);
+    console.log(count)
+    txParams = {
+      nonce: web3.utils.toHex(count),
+      gasPrice: web3.utils.toHex(process.env.GAS_PRICE), 
+      gasLimit: web3.utils.toHex(process.env.GAS_LIMIT),
+      to: bodyData.contract, 
+      value: '0x00', 
+      // EIP 155 chainId - mainnet: 1, ropsten: 3
+      chainId: web3.utils.toHex(process.env.CHAIN_ID),
+      data: bodyData.transaction
+    }
+    tx = new EthereumTx(txParams);
+    tx.sign(Buffer.from(process.env.SEEDER_KEY, 'hex'))
+    console.log('Testing address derived back from contract: ' + tx.getSenderAddress().toString('hex'));
+    serializedTx = await tx.serialize()
+    var confirmation;
+    web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'))
+      .on('transactionHash', (transactionHash) => {
+        console.log("TX Hash: " + transactionHash);
+        confirmation = transactionHash;
+      })
+      .on('receipt', (receipt) => {
+        console.log(receipt);
+        resolve(confirmation);
+      })
+      .on('error', (error) => {
+        console.log(error);
+        reject(error);
+      });
+  });
 }

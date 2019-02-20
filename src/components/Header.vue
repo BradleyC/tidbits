@@ -5,7 +5,6 @@
       <h2 class="app-name">tidbits</h2>
     </div>
     <div class="address">
-      <div v-if="!profile.email" id="google-signin-hook" />
 
       <!--<div class="blockie">-->
       <!--<div :class="g0"/>-->
@@ -16,6 +15,13 @@
       <!--<div :class="g5"/>-->
       <!--<div :class="g6"/>-->
       <!--</div>-->
+      <span v-if="account">{{ profile.email }}</span>
+      <span v-if="account && balance !== null">Balance: {{ balance }}</span>
+      <button v-if="account && !balance"
+              class="btn"
+              style="background: orange"
+              @click="claim">CLAIM YOUR 500 TOKENS</button>
+      <div v-if="!profile.email" id="google-signin-hook" />
 
     </div>
   </div>
@@ -33,16 +39,19 @@ export default {
     })
   },
   computed: {
-    ...mapGetters(['account', 'profile'])
+    ...mapGetters(['account', 'profile', 'balance'])
   },
   methods: {
-    ...mapActions(['handleLogin']),
+    ...mapActions(['handleLogin', 'issueNewUserTokens']),
     onSignIn(googleUser) {
       this.handleLogin(googleUser).catch(error => {
         console.log(error)
         console.log('account', this.account)
         console.log('email', this.profile.email)
       })
+    },
+    async claim() {
+      await this.issueNewUserTokens()
     }
   }
 }

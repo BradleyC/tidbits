@@ -9,5 +9,6 @@ export default {
   items: state => state.items,
   idToken: state => state.idToken,
   profile: state => state.profile,
-  lyrics: state => state.lyrics
+  lyrics: state => state.lyrics,
+  balance: state => state.balance
 }

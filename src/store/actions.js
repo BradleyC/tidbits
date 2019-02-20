@@ -112,10 +112,12 @@ export default {
   handleLogin: handleLoginEvent,
   sendTransaction: sendTransaction,
   createLyric: createLyric,
-  getAllLyrics: getAllLyrics
+  getAllLyrics: getAllLyrics,
+  getBalance: getBalance,
+  issueNewUserTokens: issueNewUserTokens
 }
 
-function handleLoginEvent({ commit }, googleUserObj) {
+function handleLoginEvent({ commit, dispatch }, googleUserObj) {
   var auth = googleUserObj.getAuthResponse()
   commit('SET_TOKEN', auth.id_token)
 
@@ -138,6 +140,10 @@ function handleLoginEvent({ commit }, googleUserObj) {
 
     var profile = googleUserObj.getBasicProfile()
     commit('SET_PROFILE', profile.getEmail())
+
+    await dispatch('getBalance').catch(error => {
+      console.log(error)
+    })
     resolve(response)
   })
 }
@@ -220,6 +226,7 @@ async function getAllLyrics({ state }) {
         reject(error)
       })
     if (retrieveError) return
+    console.log(lyricsLen)
     if (!Number(lyricsLen)) {
       for (var i = 5; i > 0; i--) {
         lyrics.push(genWords(5).join(' '))
@@ -239,6 +246,7 @@ async function getAllLyrics({ state }) {
           reject(error)
         })
       if (retrieveError) return
+      console.log(lyricObj)
       lyrics.push(lyricObj)
     }
     console.log(lyrics)
@@ -248,4 +256,59 @@ async function getAllLyrics({ state }) {
 
 function waitForContract() {
   return new Promise(resolve => setTimeout(resolve, 200))
+}
+
+function getBalance({ commit, state }) {
+  return new Promise(async (resolve, reject) => {
+    // TODO Split this into it's own action that prints debug?
+    console.log(
+      'Contract has this many tokens:',
+      await state.Contract.methods
+        .balanceOf('0x7b6Ef85138Aa92842AC1AccE48a4387Ab3972BE9')
+        .call({ from: state.account })
+    )
+    var balanceError
+    var balance = await state.Contract.methods
+      .balanceOf(state.account)
+      .call({ from: state.account })
+      .catch(error => {
+        console.log(error)
+        balanceError = true
+        reject(error)
+      })
+    if (balanceError) return
+    console.log(balance)
+    commit('UPDATE_BALANCE', balance)
+    resolve(balance)
+  })
+}
+
+function issueNewUserTokens({ dispatch, state }) {
+  var methodBuild = state.Contract.methods.issueTokens(state.account, 500)
+  console.log(methodBuild)
+  return new Promise(async (resolve, reject) => {
+    var params = {
+      method: 'POST',
+      url: `${process.env.SIGNING_ENDPOINT}/transact`,
+      headers: {
+        Authorization: state.idToken
+      },
+      data: {
+        special: true,
+        contract: state.Contract._address,
+        transaction: methodBuild.encodeABI()
+      }
+    }
+    var transactionErr
+    console.log(params)
+    var response = await axios(params).catch(e => {
+      console.log(e)
+      transactionErr = true
+      reject(e)
+    })
+    if (transactionErr) return
+    console.log(response)
+    dispatch('getBalance')
+    resolve(response)
+  })
 }
