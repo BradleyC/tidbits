@@ -1,6 +1,6 @@
 import axios from 'axios'
 import Web3 from 'web3'
-import { genWords, wordId } from '../utils'
+import { genWords, wordId, intToWords } from '../utils'
 
 const getAbiDeployedAddress = abi => {
   if (!abi) return ''
@@ -199,19 +199,19 @@ function createLyric({ dispatch, state, commit }, lyric) {
     })
     if (uploadError) return
     console.log(result)
-    commit('UPDATE_BALANCE')
+    dispatch('getBalance')
     commit('PUSH_LYRIC', lyric)
     resolve(true)
   })
 }
 
 function createPlaceholders() {
-  var lyrics
+  var lyrics = []
   for (var i = 5; i > 0; i--) {
     lyrics.push({
       parentLyric: '1000000',
-      lyrics: genWords(5).join(' '),
-      lyricOwner: '0x608fbc65910C4f66b384A21aC86C47AAb3f088F9'
+      lyricStr: genWords(5).join(' '),
+      lyricOwner: 'Placeholder!!!'
     })
   }
   return lyrics
@@ -260,6 +260,7 @@ async function getAllLyrics({ state }) {
         })
       if (retrieveError) return
       console.log(lyricObj)
+      lyricObj.lyricStr = intToWords(lyricObj.lyrics)
       lyrics.push(lyricObj)
     }
     console.log(lyrics)

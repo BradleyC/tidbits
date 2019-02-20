@@ -17,3 +17,14 @@ export function randomIntInc(low, high) {
 export function wordId(word) {
   return wordlist.indexOf(word)
 }
+export function intToWords(lyricInt) {
+  var words = []
+  var currentIndex, currentSubstring
+  for (var i = 5; i > 0; i--) {
+    currentIndex = lyricInt.length - 4 > 0 ? lyricInt.length - 4 : 0
+    currentSubstring = lyricInt.substring(currentIndex)
+    words.push(wordlist[Number(currentSubstring)])
+    lyricInt = lyricInt.substring(0, currentIndex)
+  }
+  return words.reverse().join(' ')
+}

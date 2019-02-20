@@ -80,10 +80,18 @@ export default {
         array.splice(index, 1)
       }
     },
-    saveLyric() {
-      this.createLyric({
+    async saveLyric() {
+      var createErr
+      await this.createLyric({
         content: this.poem
+      }).catch(error => {
+        console.log(error)
+        createErr = true
+        alert(error)
       })
+      if (createErr) return
+      // Blunt force refresh for now to show new poem
+      this.$router.go()
     }
   }
 }

@@ -3,7 +3,10 @@
     <CardBtn header-text="Make your mark!" btn-text=""/>
     <div class="lyrics">
       <div v-for="lyric in lyrics" class="box">
-        <span>{{ lyric }}</span>
+        <div class="box-header">
+          <span>By: {{ lyric.lyricOwner.substring(0, 16) }}...</span>
+        </div>
+        <span>{{ lyric.lyricStr }}</span>
       </div>
     </div>
   </div>
@@ -82,6 +85,9 @@ h2 {
   .btn {
     margin: auto 0 auto auto;
   }
+}
+.box-header {
+  background: $color2;
 }
 
 .list {
