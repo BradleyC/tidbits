@@ -16,11 +16,14 @@
       <!--<div :class="g6"/>-->
       <!--</div>-->
       <span v-if="account">{{ profile.email }}</span>
-      <span v-if="account && balance !== null">Balance: {{ balance }}</span>
+      <div v-if="account && balance" class="money-pill money-pill-div">
+        <img src="../assets/1F4DC.svg">{{ balance }}
+      </div>
       <button v-if="account && !balance"
-              class="btn"
-              style="background: orange"
-              @click="claim">CLAIM YOUR 500 TOKENS</button>
+              class="btn money-pill"
+              @click="claim">
+        <img src="../assets/1F4DC.svg">CLAIM 500 TOKENS
+      </button>
       <div v-if="!profile.email" id="google-signin-hook" />
 
     </div>
@@ -104,6 +107,24 @@ export default {
   }
   #google-signin-hook {
     padding-right: 10px;
+  }
+  .money-pill {
+    align-items: center;
+    background: orange;
+    border-radius: 5px;
+    box-shadow: 0 2px 1px -1px rgba(0, 0, 0, 0.2),
+      0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 1px 3px 0 rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: row;
+    height: 30px;
+    padding: 0 10px;
+    img {
+      height: 100%;
+      width: 20px;
+    }
+  }
+  .money-pill-div {
+    margin-right: 10px;
   }
 }
 </style>

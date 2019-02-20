@@ -7,7 +7,11 @@
     <div class="word-list">
       <Word v-for="word in words" :key="word" :word="word" @word-sel="moveWord($event)"/>
     </div>
-    <button class="btn btn-danger save" :disabled="disable()" :class="toggleActive()" @click="saveLyric">Save</button>
+    <div class="button-div">
+      <button class="btn money-pill" :disabled="disable()" :class="toggleActive()" @click="saveLyric">
+        Save Lyric <img src="../assets/1F4DC.svg">5
+      </button>
+    </div>
   </div>
 </template>
 
@@ -114,11 +118,28 @@ export default {
         flex-flow: row wrap
     .save
         text-align: right
-        padding-right: 20px
+        margin-right: 20px
     .active
         color: black
         cursor: pointer
     .inactive
         color: lightgrey
         cursor: unset
+    .money-pill
+        align-items: center
+        background-color: orange
+        box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12)
+        border-radius: 5px
+        color: white
+        cursor: pointer
+        display: flex
+        height: 50px
+        justify-content: center
+        transition: all 320ms ease
+        img
+          height: 100%
+          width: 30px
+    .button-div
+        display: flex
+        justify-content: flex-end
 </style>

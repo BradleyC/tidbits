@@ -2,7 +2,9 @@
   <CardBase>
     <div v-if="state !== 3" class="header" slot="header">
       <!--<div :class="['btn-add', {'open' : open}]" @click="btnClick"><img src="../assets/plus.svg" alt=""></div>-->
-      <div :class="['btn-add', {'open' : open}]" @click="btnClick">$5</div>
+      <div :class="['btn-add', {'open' : open}]" @click="btnClick">
+        <img src="../assets/1F4DC.svg">5
+      </div>
       <p>{{ headertxt }}</p>
     </div>
     <div v-else />
@@ -90,15 +92,19 @@ export default {
     display: flex
     .btn-add
       transition: all 320ms ease
-      display: grid
+      display: flex
       align-items: center
       cursor: pointer
-      background-color: grey
+      background-color: orange
       color: white
       box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12)
       border-radius: 5px
-      width: 50px
       height: 50px
+      width: 50px
+      justify-content: center
+      img
+        height: 100%
+        width: 30px
     .open.btn-add
       transform: translateY(-10px)
       opacity: 0
