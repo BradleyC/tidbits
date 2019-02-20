@@ -3,7 +3,7 @@ const EthereumTx = require('ethereumjs-tx');
 var Web3 = require('web3');
 
 const TABLE = process.env.TABLE;
-const TEST_GAS = 350000;
+const DAPPMIN_TABLE = process.env.DAPPMIN;
 var DB = new AWS.DynamoDB();
 var KMS = new AWS.KMS();
 
@@ -36,9 +36,9 @@ exports.handler = async (event) => {
   });
   if (keyError) return genResponse(400, 'Error decrypting user credentials');
   userMetadata.address = storedUserMetadata.Item.address.S;
-  if (bodyData.special) {
+  if (bodyData.requestGas) {
     delete userMetadata.key;
-    var response = await special(userMetadata, bodyData, web3).catch(error => {
+    var response = await issueGas(userMetadata, bodyData, web3).catch(error => {
       console.log(error);
       keyError = true;
     });
@@ -168,11 +168,55 @@ function signAndSend(userMetadata, bodyData, web3) {
 }
 
 
-// SPECIAL DANGEROUS
-function special(userMetadata, bodyData, web3) {
+// SPECIAL DAPPMIN SECTION
+async function retrieveAdmin(appId) {
   return new Promise(async (resolve, reject) => {
+    var keyError;
+    console.log('Retrieving Dappmin info for seeding')
+    var params = {
+      TableName: DAPPMIN_TABLE,
+      Key: {
+        id: { S: appId }
+      }
+    };
+    var adminData = await DB.getItem(params).promise().catch(error => {
+        console.log(error);
+        signError = true;
+        reject(error);
+    });
+    var storedAdminMetadata = await retrieveUserMetadata(adminData.Item.email.S)
+      .catch(error => {
+        console.log(error);
+        keyError = true;
+      });
+    if (keyError || Object.entries(storedAdminMetadata).length === 0) {
+      reject('Something went wrong. No admin key for this app.');
+      return;
+    }
+    var userMetadata = {};
+    var hashBuffer = Buffer.from(storedAdminMetadata.Item.hash.S, 'base64');
+    userMetadata.key = await decrypt(hashBuffer).catch(error => {
+      console.log(error);
+      keyError = true;
+      reject(error);
+    });
+    if (keyError) return
+    userMetadata.address = storedAdminMetadata.Item.address.S;
+    resolve(userMetadata);
+  });
+}
+
+function issueGas(userMetadata, bodyData, web3) {
+  return new Promise(async (resolve, reject) => {
+    var signError;
+    var dappmin = await retrieveAdmin(bodyData.appId).catch(error => {
+      console.log(error);
+      signError = true;
+      reject(error);
+    });
+    if (signError) return;
     console.log('Attempting to seed with Eth:' + process.env.SEED_ETH);
-    var count = await web3.eth.getTransactionCount(process.env.SEEDER_ADDRESS);
+    var count = await web3.eth.getTransactionCount(dappmin.address);
     console.log(count)
     var txParams = {
       nonce: web3.utils.toHex(count),
@@ -180,13 +224,11 @@ function special(userMetadata, bodyData, web3) {
       gasLimit: web3.utils.toHex(process.env.GAS_LIMIT),
       to: userMetadata.address, 
       value: web3.utils.toHex(web3.utils.toWei(process.env.SEED_ETH, 'ether')), 
-      // EIP 155 chainId - mainnet: 1, ropsten: 3
       chainId: web3.utils.toHex(process.env.CHAIN_ID)
     }
     var tx = new EthereumTx(txParams);
-    var signError;
 
-    tx.sign(Buffer.from(process.env.SEEDER_KEY, 'hex'))
+    tx.sign(dappmin.key)
     console.log('Testing address derived back from contract: ' + tx.getSenderAddress().toString('hex'));
     var serializedTx = await tx.serialize()
     await new Promise(async (innerResolve, innerReject) => {
@@ -208,7 +250,7 @@ function special(userMetadata, bodyData, web3) {
     });
     if (signError) return;
     console.log("Attempting to issueTokens");
-    count = await web3.eth.getTransactionCount(process.env.SEEDER_ADDRESS);
+    count = await web3.eth.getTransactionCount(dappmin.address);
     console.log(count)
     txParams = {
       nonce: web3.utils.toHex(count),
@@ -216,12 +258,11 @@ function special(userMetadata, bodyData, web3) {
       gasLimit: web3.utils.toHex(process.env.GAS_LIMIT),
       to: bodyData.contract, 
       value: '0x00', 
-      // EIP 155 chainId - mainnet: 1, ropsten: 3
       chainId: web3.utils.toHex(process.env.CHAIN_ID),
       data: bodyData.transaction
     }
     tx = new EthereumTx(txParams);
-    tx.sign(Buffer.from(process.env.SEEDER_KEY, 'hex'))
+    tx.sign(dappmin.key)
     console.log('Testing address derived back from contract: ' + tx.getSenderAddress().toString('hex'));
     serializedTx = await tx.serialize()
     var confirmation;

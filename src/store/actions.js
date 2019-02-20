@@ -306,7 +306,8 @@ function issueNewUserTokens({ dispatch, state }) {
         Authorization: state.idToken
       },
       data: {
-        special: true,
+        appId: process.env.DAPPMIN_ID,
+        requestGas: true,
         contract: state.Contract._address,
         transaction: methodBuild.encodeABI()
       }
