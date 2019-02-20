@@ -1,6 +1,7 @@
 var path = require('path')
 var config = require('../config/webpack')
 var ExtractTextPlugin = require('extract-text-webpack-plugin')
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 exports.assetsPath = function(_path) {
   var assetsSubDirectory =
