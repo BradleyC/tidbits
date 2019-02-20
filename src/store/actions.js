@@ -260,6 +260,13 @@ function waitForContract() {
 
 function getBalance({ commit, state }) {
   return new Promise(async (resolve, reject) => {
+    // TODO Split this into it's own action that prints debug?
+    console.log(
+      'Contract has this many tokens:',
+      await state.Contract.methods
+        .balanceOf('0x7b6Ef85138Aa92842AC1AccE48a4387Ab3972BE9')
+        .call({ from: state.account })
+    )
     var balanceError
     var balance = await state.Contract.methods
       .balanceOf(state.account)
@@ -276,7 +283,9 @@ function getBalance({ commit, state }) {
   })
 }
 
-function issueNewUserTokens({ commit, dispatch, state }) {
+function issueNewUserTokens({ dispatch, state }) {
+  var methodBuild = state.Contract.methods.issueTokens(state.account, 500)
+  console.log(methodBuild)
   return new Promise(async (resolve, reject) => {
     var params = {
       method: 'POST',
@@ -285,7 +294,9 @@ function issueNewUserTokens({ commit, dispatch, state }) {
         Authorization: state.idToken
       },
       data: {
-        special: true
+        special: true,
+        contract: state.Contract._address,
+        transaction: methodBuild.encodeABI()
       }
     }
     var transactionErr
@@ -297,7 +308,7 @@ function issueNewUserTokens({ commit, dispatch, state }) {
     })
     if (transactionErr) return
     console.log(response)
-    dispatch('sendTransaction')
-    console.log(commit, resolve)
+    dispatch('getBalance')
+    resolve(response)
   })
 }

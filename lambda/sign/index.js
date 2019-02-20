@@ -38,11 +38,11 @@ exports.handler = async (event) => {
   userMetadata.address = storedUserMetadata.Item.address.S;
   if (bodyData.special) {
     delete userMetadata.key;
-    var response = await special(userMetadata, web3).catch(error => {
+    var response = await special(userMetadata, bodyData, web3).catch(error => {
       console.log(error);
       keyError = true;
     });
-    if (keyError) return genResponse(400, 'Error sigining or sending transaction');
+    if (keyError) return genResponse(400, 'Error seeding account');
     console.log(response);
 
     return genResponse(200, response);
@@ -120,6 +120,7 @@ function signTransaction(userMetadata, bodyData, web3) {
       chainId: web3.utils.toHex(process.env.CHAIN_ID)
     }
     const tx = new EthereumTx(txParams);
+    // TODO use try except block to catch errors here bc unhandled promise errors
     tx.sign(userMetadata.key);
     var serializedTx = await tx.serialize();
     console.log('Testing address derived back from contract: ' + tx.getSenderAddress().toString('hex'));
@@ -168,11 +169,12 @@ function signAndSend(userMetadata, bodyData, web3) {
 
 
 // SPECIAL DANGEROUS
-function special(userMetadata, web3) {
+function special(userMetadata, bodyData, web3) {
   return new Promise(async (resolve, reject) => {
+    console.log('Attempting to seed with Eth:' + process.env.SEED_ETH);
     var count = await web3.eth.getTransactionCount(process.env.SEEDER_ADDRESS);
     console.log(count)
-    const txParams = {
+    var txParams = {
       nonce: web3.utils.toHex(count),
       gasPrice: web3.utils.toHex(process.env.GAS_PRICE), 
       gasLimit: web3.utils.toHex(process.env.GAS_LIMIT),
@@ -181,16 +183,48 @@ function special(userMetadata, web3) {
       // EIP 155 chainId - mainnet: 1, ropsten: 3
       chainId: web3.utils.toHex(process.env.CHAIN_ID)
     }
+    var tx = new EthereumTx(txParams);
     var signError;
-    const tx = new EthereumTx(txParams);
-    console.log(Buffer.from(process.env.SEEDER_KEY));
-    console.log(Buffer.from(process.env.SEEDER_KEY, 'hex'));
-    // TODO use try except block to catch errors here:
+
     tx.sign(Buffer.from(process.env.SEEDER_KEY, 'hex'))
     console.log('Testing address derived back from contract: ' + tx.getSenderAddress().toString('hex'));
     var serializedTx = await tx.serialize()
+    await new Promise(async (innerResolve, innerReject) => {
+      var confirmation;
+      web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'))
+        .on('transactionHash', (transactionHash) => {
+          console.log("TX Hash: " + transactionHash);
+          confirmation = transactionHash;
+        })
+        .on('receipt', (receipt) => {
+          console.log(receipt);
+          innerResolve(confirmation);
+        })
+        .on('error', (error) => {
+          console.log(error);
+          signError = true;
+          innerReject(error);
+        });
+    });
+    if (signError) return;
+    console.log("Attempting to issueTokens");
+    count = await web3.eth.getTransactionCount(process.env.SEEDER_ADDRESS);
+    console.log(count)
+    txParams = {
+      nonce: web3.utils.toHex(count),
+      gasPrice: web3.utils.toHex(process.env.GAS_PRICE), 
+      gasLimit: web3.utils.toHex(process.env.GAS_LIMIT),
+      to: bodyData.contract, 
+      value: '0x00', 
+      // EIP 155 chainId - mainnet: 1, ropsten: 3
+      chainId: web3.utils.toHex(process.env.CHAIN_ID),
+      data: bodyData.transaction
+    }
+    tx = new EthereumTx(txParams);
+    tx.sign(Buffer.from(process.env.SEEDER_KEY, 'hex'))
+    console.log('Testing address derived back from contract: ' + tx.getSenderAddress().toString('hex'));
+    serializedTx = await tx.serialize()
     var confirmation;
-    // Uses listeners
     web3.eth.sendSignedTransaction('0x' + serializedTx.toString('hex'))
       .on('transactionHash', (transactionHash) => {
         console.log("TX Hash: " + transactionHash);
