@@ -56,7 +56,7 @@ contract ERC20 {
         // Save this for an assertion in the future
         uint previousBalances = balanceOf[_from] + balanceOf[_to];
         // Subtract from the sender
-        balanceOf[_from] = balanceOf[_from] -= _value;
+        balanceOf[_from] -= _value;
         // Add the same to the recipient
         balanceOf[_to] += _value;
         emit Transfer(_from, _to, _value);
