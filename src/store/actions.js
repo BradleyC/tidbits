@@ -199,10 +199,22 @@ function createLyric({ dispatch, state, commit }, lyric) {
     })
     if (uploadError) return
     console.log(result)
-
-    commit('SET_LYRIC', lyric)
+    commit('UPDATE_BALANCE')
+    commit('PUSH_LYRIC', lyric)
     resolve(true)
   })
+}
+
+function createPlaceholders() {
+  var lyrics
+  for (var i = 5; i > 0; i--) {
+    lyrics.push({
+      parentLyric: '1000000',
+      lyrics: genWords(5).join(' '),
+      lyricOwner: '0x608fbc65910C4f66b384A21aC86C47AAb3f088F9'
+    })
+  }
+  return lyrics
 }
 
 async function getAllLyrics({ state }) {
@@ -215,6 +227,10 @@ async function getAllLyrics({ state }) {
     var lyrics = []
     var lyricObj = {}
     // var lyrics = await state.Contract.methods.lyricList().call({
+    if (!state.Contract.methods) {
+      resolve(createPlaceholders())
+      return
+    }
     var lyricsLen = await state.Contract.methods
       .totalLyrics()
       .call({
@@ -226,15 +242,12 @@ async function getAllLyrics({ state }) {
         reject(error)
       })
     if (retrieveError) return
-    console.log(lyricsLen)
+    console.log('Length of contract lyrics array', lyricsLen)
     if (!Number(lyricsLen)) {
-      for (var i = 5; i > 0; i--) {
-        lyrics.push(genWords(5).join(' '))
-      }
-      resolve(lyrics)
+      resolve(createPlaceholders())
       return
     }
-    for (var j = lyricsLen; j >= 0; j--) {
+    for (var j = lyricsLen - 1; j >= 0; j--) {
       lyricObj = await state.Contract.methods
         .lyricList(j)
         .call({
@@ -260,13 +273,13 @@ function waitForContract() {
 
 function getBalance({ commit, state }) {
   return new Promise(async (resolve, reject) => {
-    // TODO Split this into it's own action that prints debug?
-    console.log(
-      'Contract has this many tokens:',
-      await state.Contract.methods
-        .balanceOf('0x7b6Ef85138Aa92842AC1AccE48a4387Ab3972BE9')
-        .call({ from: state.account })
-    )
+    // For DEBUG, you would have to retrieve contract owner
+    // console.log(
+    //   'Contract creator has this many tokens:',
+    //   await state.Contract.methods
+    //     .balanceOf('')
+    //     .call({ from: state.account })
+    // )
     var balanceError
     var balance = await state.Contract.methods
       .balanceOf(state.account)
@@ -277,7 +290,6 @@ function getBalance({ commit, state }) {
         reject(error)
       })
     if (balanceError) return
-    console.log(balance)
     commit('UPDATE_BALANCE', balance)
     resolve(balance)
   })
@@ -285,7 +297,6 @@ function getBalance({ commit, state }) {
 
 function issueNewUserTokens({ dispatch, state }) {
   var methodBuild = state.Contract.methods.issueTokens(state.account, 500)
-  console.log(methodBuild)
   return new Promise(async (resolve, reject) => {
     var params = {
       method: 'POST',
