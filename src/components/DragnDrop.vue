@@ -25,10 +25,10 @@ export default {
     Word
   },
   props: {
-    poemObj: {
-      type: Array,
+    seedWord: {
+      type: String,
       default() {
-        return []
+        return ''
       }
     }
   },
@@ -40,7 +40,9 @@ export default {
     }
   },
   created() {
-    this.words = genWords(25)
+    this.words = genWords(24)
+    // this.words.unshift(this.seedWord)
+    this.poem.push(this.seedWord)
   },
   methods: {
     ...mapActions(['createLyric']),
@@ -122,9 +124,9 @@ export default {
     .active
         color: black
         cursor: pointer
-    .inactive
-        color: lightgrey
-        cursor: unset
+    .button-div
+        display: flex
+        justify-content: flex-end
     .money-pill
         align-items: center
         background-color: orange
@@ -139,7 +141,8 @@ export default {
         img
           height: 100%
           width: 30px
-    .button-div
-        display: flex
-        justify-content: flex-end
+    .inactive
+        background: lightgrey
+        color: grey
+        cursor: unset
 </style>

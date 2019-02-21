@@ -12,7 +12,7 @@
       <div v-if="state === 1" class="word-box">
         <Word v-for="word in words" :key="word" :word="word" @word-sel="wordSelected($event)"/>
       </div>
-      <DragnDrop :poem-obj="poemObj" ref="dragNDrop" v-if="state === 2" @poem-finalized="poemFinalized($event)"/>
+      <DragnDrop :seed-word="seedWord" ref="dragNDrop" v-if="state === 2" @poem-finalized="poemFinalized($event)"/>
     </div>
   </CardBase>
 </template>
@@ -32,7 +32,7 @@ export default {
       words: ['zoo', 'time', 'acrobat', 'chance', 'tinker'],
       open: false,
       state: 0,
-      poemObj: []
+      seedWord: ''
     }
   },
   computed: {
@@ -73,14 +73,10 @@ export default {
         el.removeAttribute('style')
       }
     },
-    poemFinalized() {
-      console.log(this.poemObj)
-      // this.createLyric({
-      //   content: this.words.join(' ')
-      // })
-    },
+    poemFinalized() {},
     wordSelected(word) {
       this.state = 2
+      this.seedWord = word
       console.log(word)
     }
   }
